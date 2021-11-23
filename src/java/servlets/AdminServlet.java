@@ -165,7 +165,7 @@ public class AdminServlet extends HttpServlet {
                     } else {
                         List<User> usersList = as.getAll(); //if there is an error that doesnt allow an insert table is reloaded
                         request.setAttribute("users", usersList);
-                        request.setAttribute("errorMsg", "There was an error while adding a user.");
+                        request.setAttribute("message", "There was an error while adding a user.");
                     }
                 } catch (Exception ex) {
 

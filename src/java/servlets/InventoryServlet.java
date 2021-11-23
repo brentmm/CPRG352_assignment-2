@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import models.Item;
-import models.User;
-import services.AccountService;
 import services.InventoryService;
 
 public class InventoryServlet extends HttpServlet {
@@ -86,23 +84,18 @@ public class InventoryServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
 
+        ItemsDB itemDB = new ItemsDB();
+        InventoryService is = new InventoryService();
+
+        //gets session
+        HttpSession session = request.getSession();
+
+        //sets local var to session value
+        String username = (String) session.getAttribute("sessionUser");
+
         try {
-            //gets session
-            HttpSession session = request.getSession();
-
-            //sets local var to session value
-            String username = (String) session.getAttribute("sessionUser");
-
-            AccountService as = new AccountService();
-            List<User> user = as.getAll();
-
-            ItemsDB itemDB = new ItemsDB();
-//            List<Item> itemList = itemDB.get(user.getUsername());
-
             List<Item> allItems = itemDB.getAll();
             int numItems = allItems.size();
-
-            InventoryService is = new InventoryService();
 
             String category = request.getParameter("category");
             String itemName = request.getParameter("item");
@@ -115,6 +108,8 @@ public class InventoryServlet extends HttpServlet {
                 request.setAttribute("userCategory", category);//setting values of input boxes
                 request.setAttribute("userItem", itemName);
                 request.setAttribute("userPrice", itemPrice);
+                List<Item> usersList = is.get(username); //if there is an error that doesnt allow an insert table is reloaded
+                request.setAttribute("items", usersList);
 
                 request.setAttribute("error", "Invalid. Please re-enter");//sets error message
 
@@ -130,7 +125,7 @@ public class InventoryServlet extends HttpServlet {
                 if (userAction.equals("addItem")) {
                     int int_category = 0;
 
-                    switch (category) {
+                    switch (category) { //switch to set category on display
                         case "kitchen":
                             int_category = 1;
                             break;
@@ -173,7 +168,7 @@ public class InventoryServlet extends HttpServlet {
                         is.insert(numItems + 1, int_category, itemName, doub_itemPrice, username); //inserts user into db table
                         List<Item> itemsList = is.get(username); //reloads updated table from db
                         request.setAttribute("items", itemsList);
-                        request.setAttribute("errorMsg", "User Added!");
+                        request.setAttribute("message", "Item added!");
 
                     } catch (Exception ex) {
                         try {
@@ -184,31 +179,50 @@ public class InventoryServlet extends HttpServlet {
 
                         }
                     }
+
+                } else {
+                    request.setAttribute("username", username); //sets username to display on web page
+                    request.setAttribute("usercategory", category);//setting values of input boxes
+                    request.setAttribute("userItem", itemName);
+                    request.setAttribute("userPrice", itemPrice);
+                    List<Item> usersList = is.get(username); //if there is an error that doesnt allow an insert table is reloaded
+                    request.setAttribute("items", usersList);
+
+                    request.setAttribute("error", "Invalid. Please re-enter");//sets error message
+
+                    //display form again
+                    getServletContext().getRequestDispatcher("/WEB-INF/inventory.jsp").forward(request, response);
+                    //after reload stop rest of execution
+                    return;
                 }
             } else {
                 request.setAttribute("username", username); //sets username to display on web page
                 request.setAttribute("usercategory", category);//setting values of input boxes
                 request.setAttribute("userItem", itemName);
                 request.setAttribute("userPrice", itemPrice);
+                List<Item> usersList = is.get(username); //if there is an error that doesnt allow an insert table is reloaded
+                request.setAttribute("items", usersList);
 
-                request.setAttribute("error", "Invalid. Please re-enter");//sets error message
+                request.setAttribute("error", "Invalid. Please input cannot be empty!");//sets error message
 
-                //display form again
-                getServletContext().getRequestDispatcher("/WEB-INF/inventory.jsp").forward(request, response);
-                //after reload stop rest of execution
+                getServletContext().getRequestDispatcher("/WEB-INF/inventory.jsp").forward(request, response); //loads inventory page
                 return;
             }
-            request.setAttribute(
-            "username", username); //sets username to display on web page
-
-            getServletContext()
-            .getRequestDispatcher("/WEB-INF/inventory.jsp").forward(request, response); //loads inventory page
-
-            return;
 
         } catch (Exception ex) {
-            Logger.getLogger(InventoryServlet.class
-            .getName()).log(Level.SEVERE, null, ex);
+
+            try {
+                List<Item> usersList = is.get(username); //if there is an error that doesnt allow an insert table is reloaded
+                request.setAttribute("username", username); //sets username to display on web page
+                request.setAttribute("items", usersList);
+                request.setAttribute("message", "Input cannot be empty");
+            } catch (Exception ex1) {
+                Logger.getLogger(InventoryServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                request.setAttribute("message", "error");
+            }
         }
+
+        getServletContext().getRequestDispatcher("/WEB-INF/inventory.jsp").forward(request, response); //loads inventory page
+        return;
     }
 }
