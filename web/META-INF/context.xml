@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Adapted from lab7 demo. Credit to owner-->
 
-<Context path="/Assignment2_JDBCattempt">
+<Context path="/Assignment2_Final">
     <Resource
         name="jdbc/homeinventorydb"
         url="jdbc:mysql://localhost:3307/homeinventorydb" 
