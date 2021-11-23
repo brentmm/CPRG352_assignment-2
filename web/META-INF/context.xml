@@ -1,2 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context path="/Assignment2_Final"/>
+<!-- Adapted from lab7 demo. Credit to owner-->
+
+<Context path="/Assignment2_JDBCattempt">
+    <Resource
+        name="jdbc/homeinventorydb"
+        url="jdbc:mysql://localhost:3307/homeinventorydb" 
+        username="root"
+        password="password"
+        maxActive="100"
+        maxIdle="30"
+        maxWait="10000" 
+        logAbandoned="true"
+        removeAbandoned="true" 
+        removeAbandonedTimeout="60"
+        driverClassName="com.mysql.jdbc.Driver"
+        type="javax.sql.DataSource"
+        auth="Container"
+    />
+</Context>
